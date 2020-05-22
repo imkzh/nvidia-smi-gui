@@ -616,6 +616,7 @@ def main():
         if not mw.isVisible():
             # app exit.
             break
+        time.sleep(0.01)
 
     is_running = False
     th.join()
