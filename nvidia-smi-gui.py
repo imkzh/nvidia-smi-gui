@@ -19,6 +19,9 @@ from subprocess import Popen, PIPE, STDOUT
 # nvidia-smi --query-compute-apps=gpu_uuid,pid,name,used_memory --format=csv,noheader,nounits -lms 500
 
 
+is_running = False
+
+
 def res(res_name):
     _script_path, _script_name = os.path.split(__file__)
     _resource_folder = os.path.join(_script_path, "resources")
@@ -549,7 +552,7 @@ def get_iostream(commandline):
     stdout_master, stdout_slave = pty.openpty()
     stderr_master, stderr_slave = pty.openpty()
     
-    proc = Popen(commandline, shell=True, stdin=PIPE, stdout=stdout_slave, stderr=stderr_slave, close_fds=True)
+    proc = Popen(commandline, stdin=PIPE, stdout=stdout_slave, stderr=stderr_slave, close_fds=True)
     
     pstdout = os.fdopen(stdout_master)
     pstderr = os.fdopen(stderr_master)
@@ -557,8 +560,11 @@ def get_iostream(commandline):
     return proc, pstdout, pstderr
 
 
-def proc_smireader(fields, main_window, smi_stdout):
-    while True:
+def proc_smireader(fields, main_window, smi_stdout, proc):
+    global is_running
+    is_running = True
+    
+    while is_running:
 
         smi_line = smi_stdout.readline().strip()
         smi_data = {k: v for k, v in zip(fields, smi_line.split(", "))}
@@ -571,9 +577,13 @@ def proc_smireader(fields, main_window, smi_stdout):
             main_window.panel_list[idx].update_async(smi_data)
 
         # print("[", threading.current_thread().name, "]", "SMI-DATA:", smi_line)
+    
+    proc.kill()
 
 
 def main():
+    global is_running
+    
     fields = [
         "index",
         "count",
@@ -591,21 +601,24 @@ def main():
         ""
     ]
 
-    cmd_gpu_stat = "nvidia-smi --query-gpu=" + ",".join(fields) + " --format=csv,noheader,nounits -lms 400"
+    cmd_gpu_stat = ["nvidia-smi", "--query-gpu=" + ",".join(fields), "--format=csv,noheader,nounits", "-lms", "200"]
     proc_gpu_stat, gpu_stat, _ = get_iostream(cmd_gpu_stat)
 
     app = QApplication([""])
     mw = MainWindow(window_name="GPU Status")
-    th = threading.Thread(target=proc_smireader, name="SMI-StdoutReader", args=(fields, mw, gpu_stat), daemon=True)
+
+    th = threading.Thread(target=proc_smireader, name="SMI-StdoutReader", args=(fields, mw, gpu_stat, proc_gpu_stat), daemon=True)
     th.start()
     mw.show()
 
     while True:
         app.processEvents()
         if not mw.isVisible():
+            # app exit.
             break
 
-
+    is_running = False
+    th.join()
 
 
 if __name__ == "__main__":
