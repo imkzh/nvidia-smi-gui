@@ -465,6 +465,14 @@ class GPUInfoPanel(QWidget):
         else:
             self.lbl_temp.setText("N/A")
 
+        if "fan.speed" in smi_data:
+            if smi_data["fan.speed"].startswith("["):
+                self.lbl_fan.setText("Passive Cooling")
+            else:
+                self.lbl_fan.setText(smi_data["fan.speed"] + "%")
+        else:
+            self.lbl_fan.setText("N/A")
+
         if "power.draw" in smi_data:
             self.lbl_power_draw.setText(smi_data["power.draw"] + "W")
 
