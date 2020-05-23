@@ -607,7 +607,6 @@ def main():
         "clocks.current.memory",
         "fan.speed",
         "utilization.gpu"
-        ""
     ]
 
     cmd_gpu_stat = ["nvidia-smi", "--query-gpu=" + ",".join(fields), "--format=csv,noheader,nounits", "-lms", "200"]
