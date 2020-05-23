@@ -12,6 +12,7 @@ import os
 import io
 import pty
 import os
+import socket
 
 from subprocess import Popen, PIPE, STDOUT 
 
@@ -613,7 +614,7 @@ def main():
     proc_gpu_stat, gpu_stat, _ = get_iostream(cmd_gpu_stat)
 
     app = QApplication([""])
-    mw = MainWindow(window_name="GPU Status")
+    mw = MainWindow(window_name="GPU Status on " + socket.gethostname())
 
     th = threading.Thread(target=proc_smireader, name="SMI-StdoutReader", args=(fields, mw, gpu_stat, proc_gpu_stat), daemon=True)
     th.start()
