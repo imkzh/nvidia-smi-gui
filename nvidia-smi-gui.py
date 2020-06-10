@@ -604,7 +604,7 @@ def main():
         "temperature.gpu",
         "power.draw",
         "enforced.power.limit",
-        "clocks.current.memory",
+        "clocks.current.graphics",
         "fan.speed",
         "utilization.gpu"
     ]
