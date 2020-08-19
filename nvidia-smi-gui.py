@@ -292,11 +292,6 @@ class GPUInfoPanel(QWidget):
             self.width() - self.lbl_mem_used.x() - self.lbl_mem_used.width() - self.margin - self.lbl_mem_percentage.width() - self.margin - self.padding_left,
             self.icon_mem.height()
         )
-        self.progress_mem.setStyleSheet(
-            "QProgressBar#progress_mem {"
-            "   background-color: white;"
-            "}"
-        )
 
         ## Power Indicator bar:
         # power indicator icon geometry
@@ -373,9 +368,28 @@ class GPUInfoPanel(QWidget):
             self.width() - self.lbl_power_draw.x() - self.lbl_power_draw.width() - self.margin - self.lbl_power_percentage.width() - self.margin - self.padding_left,
             self.icon_power.height()
         )
-        self.progress_power.setStyleSheet(
-            "QProgressBar#progress_power {"
-            "   background-color: white;"
+
+        self.setStyleSheet(
+            "QProgressBar {"
+            "   border: 1px solid #aaa;"
+            "   text-align: top;"
+            "   padding: 1px;"
+            "   border-top-left-radius: 11px;"
+            "   border-bottom-left-radius: 11px;"
+            "   background: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1,"
+            "       stop: 0 #fff,"
+            "       stop: 1 #eee "
+            "   );"
+            "   width: 15px;"
+            "   outline: none;"
+            "}"
+            "QProgressBar::chunk {"  # 
+            "   background: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1,"
+            "       stop: 0 #007fff,"
+            "       stop: 1 #005dba"
+            "   );"
+            "   border-top-left-radius: 10px;"
+            "   border-bottom-left-radius: 10px;"
             "}"
         )
 
