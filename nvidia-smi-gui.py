@@ -38,7 +38,7 @@ class GPUInfoPanel(QWidget):
         self.setWindowTitle(window_name)
         self.setFixedSize(500, 146)
 
-        self.padding_top = 10
+        self.padding_top = 5
         self.padding_left = 10
         self.padding_right = 10
         self.padding_bottom = 10
@@ -82,7 +82,7 @@ class GPUInfoPanel(QWidget):
     def init_ui(self):
 
         ## Self geometry
-        self.setFixedSize(500, 146)
+        self.setFixedSize(460, 146)
         self.setStyleSheet(
             "QWidget#GPU_PNL {"
             "   background-color: white;"
@@ -91,7 +91,7 @@ class GPUInfoPanel(QWidget):
         # btn_connect geometry
         ## lbl_gpumodel geometry
         self.lbl_gpumodel.setObjectName("lbl_gpumodel")
-        self.lbl_gpumodel.setGeometry(self.padding_left, self.padding_top, 200, 40)
+        self.lbl_gpumodel.setGeometry(self.padding_left, self.padding_top, self.width() - self.padding_left - self.padding_right, 40)
         self.lbl_gpumodel.setStyleSheet(
             "QLabel#lbl_gpumodel {"
             "   font-size: 26px; "
@@ -125,20 +125,9 @@ class GPUInfoPanel(QWidget):
             "}"
         )
 
-        ## Fan indicator related widgets:
-        # lbl_fan geometry
         self.lbl_fan.setObjectName("lbl_fan")
-        self.lbl_fan.setGeometry(
-            self.width() - self.padding_right - 80, self.padding_top,
-            70, 24
-        )
-        # icon_fan geometry
         self.icon_fan.setObjectName("icon_fan")
         self.icon_fan.setFocusPolicy(QtCore.Qt.NoFocus)
-        self.icon_fan.setGeometry(
-            self.lbl_fan.x() - self.margin - 24, self.lbl_fan.y(),
-            24, 24
-        )
         self.icon_fan.setStyleSheet(
             "QPushButton#icon_fan{"
             "   border-width: 1px;"
@@ -147,44 +136,20 @@ class GPUInfoPanel(QWidget):
             "   background-color: none;"
             "}")
 
-        ## Clock indicator related widgets:
-        # lbl_clock geometry
         self.lbl_clock.setObjectName("lbl_clock")
-        self.lbl_clock.setGeometry(
-            self.lbl_fan.x(), self.lbl_fan.y() + self.lbl_fan.height() + self.margin,
-            self.lbl_fan.width(), self.lbl_fan.height()
-        )
-        # icon_clock geometry
         self.icon_clock.setObjectName("icon_clock")
         self.icon_clock.setFocusPolicy(QtCore.Qt.NoFocus)
-        self.icon_clock.setGeometry(
-            self.lbl_clock.x() - self.margin - 24, self.lbl_clock.y(),
-            self.icon_fan.width(), self.icon_fan.height()
-        )
         self.icon_clock.setStyleSheet(
             "QPushButton#icon_clock{"
             "   border-width: 1px;"
             "   border-color: #aaa;"
             "   border-style: solid;"
-            "   background-color: white;"
+            "   background-color: none;"
             "}")
 
-        ## Temperature indicator related widgets (snap left to Fan indicator)
-
-        # lbl_temp geometry
         self.lbl_temp.setObjectName("lbl_temp")
-        self.lbl_temp.setGeometry(
-            self.icon_fan.x() - self.margin - self.lbl_fan.width(), self.lbl_fan.y(),
-            self.lbl_fan.width(), self.lbl_fan.height()
-        )
-
-        # icon_temp geometry
         self.icon_temp.setObjectName("icon_temp")
         self.icon_temp.setFocusPolicy(QtCore.Qt.NoFocus)
-        self.icon_temp.setGeometry(
-            self.lbl_temp.x() - self.margin - self.icon_fan.width(), self.lbl_temp.y(),
-            self.icon_fan.width(), self.icon_fan.height()
-            )
         self.icon_temp.setStyleSheet(
             "QPushButton#icon_temp{"
             "   border-width: 1px;"
@@ -193,21 +158,9 @@ class GPUInfoPanel(QWidget):
             "   background-color: none;"
             "}")
 
-        ## Utilization indicator related widgets (snap left to Clock indicator)
-        # lbl_utilization geometry
         self.lbl_utilization.setObjectName("lbl_utilization")
-        self.lbl_utilization.setGeometry(
-            self.icon_clock.x() - self.margin - self.lbl_clock.width(), self.lbl_clock.y(),
-            self.lbl_fan.width(), self.lbl_fan.height()
-        )
-
-        # icon_utilization geometry
         self.icon_utilization.setObjectName("icon_utilization")
         self.icon_utilization.setFocusPolicy(QtCore.Qt.NoFocus)
-        self.icon_utilization.setGeometry(
-            self.lbl_utilization.x() - self.margin - self.icon_fan.width(), self.lbl_utilization.y(),
-            self.icon_fan.width(), self.icon_fan.height()
-            )
         self.icon_utilization.setStyleSheet(
             "QPushButton#icon_utilization{"
             "   border-width: 1px;"
@@ -215,6 +168,16 @@ class GPUInfoPanel(QWidget):
             "   border-style: none;"
             "   background-color: none;"
             "}")
+
+        spring = [(self.icon_utilization, self.lbl_utilization), (self.icon_temp, self.lbl_temp), (self.icon_fan, self.lbl_fan), (self.icon_clock, self.lbl_clock)]
+        spring_geometry = (self.padding_left, self.lbl_pcibusid.y() + self.lbl_pcibusid.height() + self.margin, self.width() - self.padding_left - self.padding_right, 24)
+        spring_x, spring_y, spring_w, spring_h = spring_geometry
+
+        item_width = spring_w // len(spring)
+        icon_sz = 24
+        for idx, (icon, lbl) in enumerate(spring):
+            icon.setGeometry(spring_x + item_width * idx, spring_y, icon_sz, icon_sz)
+            lbl.setGeometry(spring_x + item_width * idx + icon_sz + self.margin, spring_y, item_width - icon_sz - self.margin, icon_sz)
 
         ## Memory Indicator bar:
         # mem indicator icon geometry
@@ -393,6 +356,8 @@ class GPUInfoPanel(QWidget):
             "}"
         )
 
+        self.setFixedHeight(self.icon_power.y() + self.icon_power.height() + self.padding_bottom)
+
         ## Panel Seperator
         self.sep_panel.setObjectName("sep_panel")
         self.sep_panel.setGeometry(
@@ -423,7 +388,6 @@ class GPUInfoPanel(QWidget):
 
         self.icon_power.setIcon(QtGui.QIcon(res("gauge.svg")))
         self.icon_power.setIconSize(self.icon_power.size())
-        pass
 
     def move_to_center(self):
         qr = self.frameGeometry()
