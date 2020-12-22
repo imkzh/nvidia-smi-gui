@@ -623,7 +623,7 @@ def main():
         "utilization.gpu"
     ]
 
-    cmd_gpu_stat = ["nvidia-smi", "--query-gpu=" + ",".join(fields), "--format=csv,noheader,nounits", "-lms", "200"]
+    cmd_gpu_stat = ["nvidia-smi", "--query-gpu=" + ",".join(fields), "--format=csv,noheader,nounits", "-lms", "300"]
     proc_gpu_stat, gpu_stat, _ = get_iostream(cmd_gpu_stat)
 
     app = QApplication([""])
@@ -638,7 +638,7 @@ def main():
         if not mw.isVisible():
             # app exit.
             break
-        time.sleep(0.01)
+        time.sleep(0.05)
 
     is_running = False
     th.join()
