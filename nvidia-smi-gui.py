@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 
-from PyQt4 import QtGui
-from PyQt4 import QtCore
-from PyQt4.QtGui import QApplication
-from PyQt4.QtGui import QWidget
+from PyQt5 import QtGui, QtCore
+import PyQt5.QtWidgets as QtWidgets
+from PyQt5.QtWidgets import QApplication
+
 import threading
 import time
 
@@ -29,7 +29,9 @@ def res(res_name):
     return os.path.join(_resource_folder, res_name)
 
 
-class GPUInfoPanel(QWidget):
+class GPUInfoPanel(QtWidgets.QWidget):
+            
+    signal_update = QtCore.pyqtSignal(dict, name="SIGNAL_UPDATE")
     
     def __init__(self, window_name="", *args, **kwargs):
         super(GPUInfoPanel, self).__init__(*args, **kwargs)
@@ -45,38 +47,38 @@ class GPUInfoPanel(QWidget):
 
         self.margin = 10
 
-        self.lbl_gpumodel = QtGui.QLabel("Graphics Device", self)
-        self.lbl_gpuid = QtGui.QLabel("#0", self)
-        self.lbl_pcibusid = QtGui.QLabel("bus: 00000000:00:00.0", self)
+        self.lbl_gpumodel = QtWidgets.QLabel("Graphics Device", self)
+        self.lbl_gpuid = QtWidgets.QLabel("#0", self)
+        self.lbl_pcibusid = QtWidgets.QLabel("bus: 00000000:00:00.0", self)
         
-        self.lbl_temp = QtGui.QLabel("37deg", self)
-        self.lbl_fan = QtGui.QLabel("20%", self)
-        self.lbl_utilization = QtGui.QLabel("78%", self)
-        self.lbl_clock = QtGui.QLabel("679MHz", self)
+        self.lbl_temp = QtWidgets.QLabel("37deg", self)
+        self.lbl_fan = QtWidgets.QLabel("20%", self)
+        self.lbl_utilization = QtWidgets.QLabel("78%", self)
+        self.lbl_clock = QtWidgets.QLabel("679MHz", self)
         
-        self.lbl_mem_used = QtGui.QLabel("3000M", self)
-        self.sep_mem = QtGui.QFrame(self)
-        self.lbl_mem_total = QtGui.QLabel("8110M", self)
+        self.lbl_mem_used = QtWidgets.QLabel("3000M", self)
+        self.sep_mem = QtWidgets.QFrame(self)
+        self.lbl_mem_total = QtWidgets.QLabel("8110M", self)
         
-        self.lbl_power_draw = QtGui.QLabel("37W", self)
-        self.sep_power = QtGui.QFrame(self)
-        self.lbl_power_limit = QtGui.QLabel("180W", self)
+        self.lbl_power_draw = QtWidgets.QLabel("37W", self)
+        self.sep_power = QtWidgets.QFrame(self)
+        self.lbl_power_limit = QtWidgets.QLabel("180W", self)
         
-        self.progress_mem = QtGui.QProgressBar(self)
-        self.progress_power = QtGui.QProgressBar(self)
-        self.lbl_mem_percentage = QtGui.QLabel("46%", self)
-        self.lbl_power_percentage = QtGui.QLabel("27%", self)
+        self.progress_mem = QtWidgets.QProgressBar(self)
+        self.progress_power = QtWidgets.QProgressBar(self)
+        self.lbl_mem_percentage = QtWidgets.QLabel("46%", self)
+        self.lbl_power_percentage = QtWidgets.QLabel("27%", self)
         
-        self.icon_temp = QtGui.QPushButton("", self)
-        self.icon_fan = QtGui.QPushButton("", self)
-        self.icon_utilization = QtGui.QPushButton("", self)
-        self.icon_clock = QtGui.QPushButton("", self)
-        self.icon_mem = QtGui.QPushButton("", self)
-        self.icon_power = QtGui.QPushButton("", self)
+        self.icon_temp = QtWidgets.QPushButton("", self)
+        self.icon_fan = QtWidgets.QPushButton("", self)
+        self.icon_utilization = QtWidgets.QPushButton("", self)
+        self.icon_clock = QtWidgets.QPushButton("", self)
+        self.icon_mem = QtWidgets.QPushButton("", self)
+        self.icon_power = QtWidgets.QPushButton("", self)
 
-        self.sep_panel = QtGui.QWidget(self)
+        self.sep_panel = QtWidgets.QWidget(self)
 
-        self.connect(self, QtCore.SIGNAL("SIGNAL_UPDATE"), self.update_info)
+        self.signal_update.connect(self.update_info)
         self.init_ui()
         
     def init_ui(self):
@@ -216,7 +218,7 @@ class GPUInfoPanel(QWidget):
             self.lbl_mem_used.x(), self.lbl_mem_used.y() + self.lbl_mem_used.height() - 1,
             self.lbl_mem_used.width(), 1
         )
-        self.sep_mem.setFrameShape(QtGui.QFrame.HLine)
+        self.sep_mem.setFrameShape(QtWidgets.QFrame.HLine)
 
         # mem total label geometry
         self.lbl_mem_total.setObjectName("lbl_mem_total")
@@ -293,7 +295,7 @@ class GPUInfoPanel(QWidget):
             self.lbl_power_draw.x(), self.lbl_power_draw.y() + self.lbl_power_draw.height() - 1,
             self.lbl_power_draw.width(), 1
         )
-        self.sep_power.setFrameShape(QtGui.QFrame.HLine)
+        self.sep_power.setFrameShape(QtWidgets.QFrame.HLine)
 
         # power limit label geometry
         self.lbl_power_limit.setObjectName("lbl_power_limit")
@@ -395,7 +397,7 @@ class GPUInfoPanel(QWidget):
 
     def move_to_center(self):
         qr = self.frameGeometry()
-        cp = QtGui.QDesktopWidget().availableGeometry().center()
+        cp = QtWidgets.QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
         self.move(qr.topLeft())
     
@@ -470,16 +472,19 @@ class GPUInfoPanel(QWidget):
             self.progress_power.setValue(percentage)
 
     def update_async(self, smi_data):
-        self.emit(QtCore.SIGNAL("SIGNAL_UPDATE"), smi_data)
+        self.signal_update.emit(smi_data)
 
 
-class MainWindow(QtGui.QWidget):
+class MainWindow(QtWidgets.QWidget):
+
+    signal_addnew = QtCore.pyqtSignal(name="SIGNAL_ADDNEW")
+    
     def __init__(self, *args, window_name):
         super(MainWindow, self).__init__(*args)
         self.window_name = window_name
         self.panel_list = []
 
-        self.connect(self, QtCore.SIGNAL("SIGNAL_ADDNEW"), self.add_new_panel)
+        self.signal_addnew.connect(self.add_new_panel)
         self.cond_pnl = threading.Condition()
 
         self.init_ui()
@@ -521,7 +526,7 @@ class MainWindow(QtGui.QWidget):
         self.cond_pnl.acquire()
 
         # print("[", threading.current_thread().name, "]", "lock acquired, sending signal...")
-        self.emit(QtCore.SIGNAL("SIGNAL_ADDNEW"))
+        self.signal_addnew.emit()
 
         # print("[", threading.current_thread().name, "]", "waiting on condition")
         self.cond_pnl.wait()
@@ -532,7 +537,7 @@ class MainWindow(QtGui.QWidget):
 
     def move_to_center(self):
         qr = self.frameGeometry()
-        cp = QtGui.QDesktopWidget().availableGeometry().center()
+        cp = QtWidgets.QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
         self.move(qr.topLeft())
     pass
