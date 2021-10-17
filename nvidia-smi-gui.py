@@ -14,6 +14,8 @@ import pty
 import os
 import socket
 
+import argparse
+
 from subprocess import Popen, PIPE, STDOUT 
 
 # nvidia-smi --query-gpu=index,count,name,uuid,memory.used,memory.total,temperature.gpu,power.draw --format=csv,noheader,nounits -lms 500
@@ -572,6 +574,14 @@ def proc_smireader(fields, main_window, smi_stdout, proc):
     proc.kill()
 
 
+def parse_args():
+    par = argparse.ArgumentParser()
+    par.add_argument("-H", "--host")
+    par.add_argument("-p", "--port", type=int, default=22)
+    
+    return par.parse_args()
+
+
 def main():
     global is_running
     
@@ -591,11 +601,21 @@ def main():
         "utilization.gpu"
     ]
 
+    args = parse_args()
+
     cmd_gpu_stat = ["nvidia-smi", "--query-gpu=" + ",".join(fields), "--format=csv,noheader,nounits", "-lms", "300"]
+
+    if args.host is not None:
+        cmd_gpu_stat = ["ssh", "-p", str(args.port), args.host] + cmd_gpu_stat
+        hostname = args.host
+    else:
+        hostname = socket.gethostname()
+
     proc_gpu_stat, gpu_stat, _ = get_iostream(cmd_gpu_stat)
 
     app = QApplication([""])
-    mw = MainWindow(window_name="GPU Status on " + socket.gethostname())
+
+    mw = MainWindow(window_name="GPU Status on " + hostname)
 
     th = threading.Thread(target=proc_smireader, name="SMI-StdoutReader", args=(fields, mw, gpu_stat, proc_gpu_stat), daemon=True)
     th.start()
