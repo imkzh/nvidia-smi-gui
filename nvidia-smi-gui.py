@@ -417,7 +417,7 @@ class GPUInfoPanel(QtWidgets.QWidget):
         #     "temperature.gpu",
         #     "power.draw",
         #     "enforced.power.limit",
-        #     "clocks.current.memory"
+        #     "clocks.current.graphics"
         # ]
         if "index" in smi_data:
             self.lbl_gpuid.setText("#" + smi_data["index"])
@@ -431,8 +431,8 @@ class GPUInfoPanel(QtWidgets.QWidget):
         if "utilization.gpu" in smi_data:
             self.lbl_utilization.setText(smi_data["utilization.gpu"] + "%")
 
-        if "clocks.current.memory" in smi_data:
-            self.lbl_clock.setText(smi_data["clocks.current.memory"] + "MHz")
+        if "clocks.current.graphics" in smi_data:
+            self.lbl_clock.setText(smi_data["clocks.current.graphics"] + "MHz")
 
         if "memory.used" in smi_data:
             self.lbl_mem_used.setText(smi_data["memory.used"] + "M")
